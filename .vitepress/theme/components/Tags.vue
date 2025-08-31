@@ -18,28 +18,27 @@
     <div class="date">{{ article.frontMatter.date }}</div>
   </a>
 </template>
-<script lang="ts" setup>
+<script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useData, withBase, useRouter } from 'vitepress'
 import { initTags } from '../functions'
 
 const router = useRouter()
 
-const selectTag = ref('')
 const { theme } = useData()
 const tags = computed(() => initTags(theme.value.posts))
+const selectTag = ref(Object.keys(tags.value)[0] || '')
 
-const toggleTag = (tag: string) => {
+const toggleTag = (tag) => {
   router.go(withBase(`/pages/tags?tag=${tag}`))
 }
 
 onMounted(() => {
-  const url = location.href.split('?')[1]
-  const params = new URLSearchParams(url)
-  selectTag.value = params.get('tag') || ''
-  if (!selectTag.value) {
-    const defaultDisplayTag = Object.keys(tags.value)[0]
-    toggleTag(defaultDisplayTag)
+  const url = location.href
+  const params = new URL(url).searchParams
+  const currTag = params.get('tag') || ''
+  if (currTag) {
+    selectTag.value = currTag
   }
 })
 </script>
