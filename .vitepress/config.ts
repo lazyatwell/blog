@@ -10,7 +10,7 @@ const isProd = process.env.NODE_ENV === 'production'
 export default defineConfig({
   title: 'BluePen',
   lang: 'zh-CN',
-  base: '/',
+  base: '/blog/',
   cacheDir: './node_modules/vitepress_cache',
   description: 'vitepress-blog',
   outDir: './dist',
