@@ -1,16 +1,17 @@
 {
-  "name": "ti.bi",
+  "name": "blog",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "vitepress dev --host 0.0.0.0",
     "build": "cross-env NODE_ENV=production vitepress build",
     "preview": "cross-env NODE_ENV=production vitepress preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "blog",
+    "vitepress",
+    "vue"
+  ],
+  "license": "MIT",
   "type": "module",
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
@@ -28,10 +29,13 @@
     "fs-extra": "^11.3.1",
     "globby": "^14.1.0",
     "gray-matter": "^4.0.3",
+    "lucide-vue-next": "^0.542.0",
     "prettier": "^3.6.2",
+    "sass": "^1.91.0",
     "typescript": "^5.9.2",
-    "vitepress": "^1.6.4",
     "vite": "^5.4.19",
-    "vitepress-plugin-comment-with-giscus": "^1.1.15"
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-comment-with-giscus": "^1.1.15",
+    "vitepress-plugin-lightbox": "^1.0.3"
   }
 }

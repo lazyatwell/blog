@@ -1,0 +1,58 @@
+        name: Deploy VitePress site to Pages
+
+        on:
+          push:
+            branches: ["main"] # 推送到的主分支
+
+        # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+        permissions:
+          contents: read
+          pages: write
+          id-token: write
+
+        # Allow only one concurrent deployment, disabling all others
+        concurrency:
+          group: "pages"
+          cancel-in-progress: false
+
+        # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+        jobs:
+          # Build job to run the VitePress build command
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - name: Checkout
+                uses: actions/checkout@v4
+                with:
+                  fetch-depth: 1 # Fetch latest commit
+
+              - uses: pnpm/action-setup@v4
+                name: Install pnpm
+                with:
+                  version: 10
+                  run_install: false
+
+              - name: Install Node.js
+                uses: actions/setup-node@v4
+                with:
+                  node-version: 22
+                  cache: 'pnpm'
+
+              - name: Install dependencies
+                run: pnpm install
+
+              - name: Build VitePress site
+                run: pnpm build
+
+              - name: Upload artifact
+                uses: actions/upload-pages-artifact@v3
+                with:
+                  path: ./dist
+
+          # Deployment job to deploy the pages
+          deploy:
+            needs: build
+            runs-on: ubuntu-latest
+            steps:
+              - name: Deploy to GitHub Pages
+                uses: actions/deploy-pages@v4

@@ -6,7 +6,7 @@ import Category from './components/Category.vue'
 import Tags from './components/Tags.vue'
 import Page from './components/Page.vue'
 import Comment from './components/CommentGiscus.vue'
-
+import { CalendarDays, Tag } from 'lucide-vue-next'
 import './custom.css'
 
 export default {
@@ -19,5 +19,8 @@ export default {
         app.component('Archives', Archives)
         app.component('Page', Page)
         app.component('Comment', Comment)
+        // 全局图标组件
+        app.component('CalendarDays', CalendarDays)
+        app.component('Tag', Tag)
     }
 } satisfies Theme
