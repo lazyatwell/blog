@@ -110,9 +110,7 @@ const genArticleTag = (post: Article) => {
   margin: 10px 0;
   line-height: 1.5rem;
 }
-.post-info {
 
-}
 .pagination {
   margin-top: 16px;
   display: flex;

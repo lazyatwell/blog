@@ -1,6 +1,8 @@
 import { defineConfig } from 'vitepress'
 import { getPosts } from './theme/serverUtils'
 import lightbox from 'vitepress-plugin-lightbox'
+import fs from 'node:fs'
+import path from 'node:path'
 
 //每页的文章数量
 const pageSize = 10
@@ -10,7 +12,7 @@ const isProd = process.env.NODE_ENV === 'production'
 export default defineConfig({
   title: 'BluePen',
   lang: 'zh-CN',
-  base: '/blog/',
+  base: '/',
   cacheDir: './node_modules/vitepress_cache',
   description: 'vitepress-blog',
   outDir: './dist',
@@ -110,5 +112,9 @@ export default defineConfig({
       // image lazy loading is disabled by default
       lazyLoading: true
     }
+  },
+  async buildEnd(siteConfig) {
+    // 拷贝 CNAME 文件至 dist 目录
+    fs.copyFileSync('CNAME', path.join(siteConfig.outDir, 'CNAME'))
   }
 })
