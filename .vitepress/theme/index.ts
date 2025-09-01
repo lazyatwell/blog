@@ -10,17 +10,17 @@ import { CalendarDays, Tag } from 'lucide-vue-next'
 import './custom.css'
 
 export default {
-    ...DefaultTheme,
-    Layout: NewLayout,
-    enhanceApp({ app }) {
-        // register global compoment
-        app.component('Tags', Tags)
-        app.component('Category', Category)
-        app.component('Archives', Archives)
-        app.component('Page', Page)
-        app.component('Comment', Comment)
-        // 全局图标组件
-        app.component('CalendarDays', CalendarDays)
-        app.component('Tag', Tag)
-    }
+  ...DefaultTheme,
+  Layout: NewLayout,
+  enhanceApp({ app }) {
+    // register global compoment
+    app.component('Tags', Tags)
+    app.component('Category', Category)
+    app.component('Archives', Archives)
+    app.component('Page', Page)
+    app.component('Comment', Comment)
+    // 全局图标组件
+    app.component('CalendarDays', CalendarDays)
+    app.component('Tag', Tag)
+  }
 } satisfies Theme

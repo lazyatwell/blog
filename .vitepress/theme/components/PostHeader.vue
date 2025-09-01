@@ -2,7 +2,7 @@
   <div v-show="!$frontmatter.page" class="post-body">
     <div class="post-title">{{ $frontmatter.title }}</div>
     <div class="post-info">
-      <div class="post-info-item"><CalendarDays :size="12"/>{{ convertDateV2($frontmatter.date) }}</div>
+      <div class="post-info-item"><CalendarDays :size="12" />{{ convertDateV2($frontmatter.date) }}</div>
       <div class="post-info-item tags">
         <Tag :size="12" />
         <span v-for="item in $frontmatter.tags"

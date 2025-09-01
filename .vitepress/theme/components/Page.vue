@@ -1,19 +1,23 @@
 <template>
   <div v-for="(article, index) in posts" :key="index" class="post-list">
-    <div class="post-header">
-      <div class="post-title">
-        <component :is="genArticleTag(article)" />
-        <a :href="withBase(article.regularPath)"> {{ article.frontMatter.title }}</a>
+    <div class="group" @touchend="handleTouch(article)">
+      <div class="post-header">
+        <div class="post-title decoration-dashed underline-offset-4 group-hover:underline">
+          <component :is="genArticleTag(article)" />
+          <a :href="withBase(article.regularPath)"> {{
+            article.frontMatter.title }}</a>
+        </div>
       </div>
-    </div>
-    <p class="describe" v-html="article.frontMatter.description"></p>
-    <div class="post-info">
-      <div class="post-info-item"><CalendarDays :size="12" />{{ article.frontMatter.date }}</div>
-      <div class="post-info-item tags">
-        <Tag :size="12" />
-        <span v-for="item in article.frontMatter.tags"
-          ><a :href="withBase(`/pages/tags.html?tag=${item}`)"> {{ item }}</a></span
-        >
+      <p class="describe" v-html="article.frontMatter.description"></p>
+      <div class="post-info">
+        <div class="post-info-item">
+          <CalendarDays :size="12" />{{ article.frontMatter.date }}
+        </div>
+        <div class="post-info-item tags">
+          <Tag :size="12" />
+          <span v-for="item in article.frontMatter.tags"><a :href="withBase(`/pages/tags.html?tag=${item}`)"> {{ item
+              }}</a></span>
+        </div>
       </div>
     </div>
   </div>
@@ -34,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { withBase } from 'vitepress'
+import { withBase, useRouter } from 'vitepress'
 import { PropType, computed, h } from 'vue'
 import { generatePaginationArray } from '../pagination'
 interface Article {
@@ -62,6 +66,8 @@ const props = defineProps({
   }
 })
 
+const router = useRouter()
+
 const pageArray = computed(() => {
   return generatePaginationArray(props.pagesNum, props.pageCurrent)
 })
@@ -77,6 +83,10 @@ const genArticleTag = (post: Article) => {
   }
   return h('span', { class: 'tag', title: '普通文章' }, '')
 }
+
+const handleTouch = (article: Article) => {
+  router.go(withBase(article.regularPath))
+}
 </script>
 
 <style lang="scss" scoped>
@@ -84,19 +94,17 @@ const genArticleTag = (post: Article) => {
   border-bottom: 1px dashed var(--vp-c-divider);
   padding: 14px 0 14px 0;
 }
+
 .post-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 .post-title {
   font-size: 1rem;
-  font-weight: 500;
-  color: var(--bt-theme-title) !important;
+  font-weight: 600;
   margin: 0.1rem 0;
-}
-.post-title a {
-  color: var(--bt-theme-title) !important;
 }
 
 .describe {
@@ -116,6 +124,7 @@ const genArticleTag = (post: Article) => {
   display: flex;
   justify-content: center;
 }
+
 .link {
   display: inline-block;
   width: 26px;
@@ -126,6 +135,7 @@ const genArticleTag = (post: Article) => {
   border-radius: 20px;
   margin: 0 4px;
 }
+
 .link.active {
   background: var(--vp-c-text-1);
   color: var(--vp-c-neutral-inverse);
@@ -136,11 +146,13 @@ const genArticleTag = (post: Article) => {
   .post-list {
     padding: 14px 0 14px 0;
   }
+
   .post-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
+
   .post-title {
     font-size: 1.0625rem;
     font-weight: 400;
@@ -151,6 +163,7 @@ const genArticleTag = (post: Article) => {
     overflow: hidden;
     width: 17rem;
   }
+
   .describe {
     font-size: 0.9375rem;
     display: -webkit-box;

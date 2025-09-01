@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import Tailwind from '@tailwindcss/vite'
 import { getPosts } from './theme/serverUtils'
 import lightbox from 'vitepress-plugin-lightbox'
 import fs from 'node:fs'
@@ -37,15 +38,23 @@ export default defineConfig({
   } as any,
   srcExclude: isProd
     ? [
-        '**/trash/**/*.md', // 排除所有 trash 目录
-        '**/draft/**/*.md', // 递归排除子目录
-        '**/private-notes/*.md', // 排除特定文件
-        'README.md'
-      ]
+      '**/trash/**/*.md', // 排除所有 trash 目录
+      '**/draft/**/*.md', // 递归排除子目录
+      '**/private-notes/*.md', // 排除特定文件
+      'README.md'
+    ]
     : ['README.md'],
   vite: {
     //build: { minify: false }
-    server: { port: 5000 }
+    server: { port: 5000 },
+    plugins: [Tailwind()],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: 'modern'
+        }
+      }
+    }
   },
   locales: {
     root: {
