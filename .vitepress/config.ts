@@ -4,6 +4,7 @@ import { getPosts } from './theme/serverUtils'
 import lightbox from 'vitepress-plugin-lightbox'
 import fs from 'node:fs'
 import path from 'node:path'
+import { handleHeadMeta } from './utils/handleHeadMeta'
 
 //每页的文章数量
 const pageSize = 10
@@ -121,6 +122,9 @@ export default defineConfig({
       // image lazy loading is disabled by default
       lazyLoading: true
     }
+  },
+  async transformHead(context) {
+    return handleHeadMeta(context)
   },
   async buildEnd(siteConfig) {
     // 拷贝 CNAME 文件至 dist 目录
