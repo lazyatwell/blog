@@ -5,6 +5,8 @@ import lightbox from 'vitepress-plugin-lightbox'
 import fs from 'node:fs'
 import path from 'node:path'
 import { handleHeadMeta } from './utils/handleHeadMeta'
+// import { ab_mdit, jsdom_init } from "markdown-it-any-block"
+// jsdom_init()
 
 //每页的文章数量
 const pageSize = 10
@@ -117,6 +119,8 @@ export default defineConfig({
     config: (md) => {
       // Use lightbox plugin
       md.use(lightbox, {})
+      // Use markdown-it-any-block plugin
+      // md.use(ab_mdit)
     },
     image: {
       // image lazy loading is disabled by default
