@@ -7,7 +7,8 @@ import Tags from './components/Tags.vue'
 import Page from './components/Page.vue'
 import Comment from './components/CommentGiscus.vue'
 import { CalendarDays, Tag } from 'lucide-vue-next'
-import './custom.css'
+import './css/index.css'
+import './css/custom.scss'
 
 export default {
   ...DefaultTheme,
