@@ -49,6 +49,11 @@ export default defineConfig({
     : ['README.md'],
   vite: {
     //build: { minify: false }
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, '../customComponents'), // 将 @ 指向 customComponents 目录
+      },
+    },
     server: { port: 5000 },
     plugins: [Tailwind()],
     css: {
