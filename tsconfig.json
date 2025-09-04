@@ -10,7 +10,11 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "lib": ["ESNext", "DOM"],
-        "types": [],
+        "types": [
+            "sandpack-vue3/global",
+            "react",
+            "react-dom"
+        ],
         "baseUrl": "./",
         "paths": {
             "@/*": ["customComponents/*"]
@@ -21,6 +25,8 @@
         ".vitepress/**/*.d.ts",
         ".vitepress/**/*.tsx",
         ".vitepress/**/*.vue",
+        "customComponents/**/*.tsx",
+        "customComponents/**/*.vue",
         "shims-vue.d.ts"
     ],
     "exclude": ["dist", "node_modules"]

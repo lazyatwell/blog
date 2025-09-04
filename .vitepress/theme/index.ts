@@ -7,6 +7,7 @@ import Tags from './components/Tags.vue'
 import Page from './components/Page.vue'
 import Comment from './components/CommentGiscus.vue'
 import { CalendarDays, Tag } from 'lucide-vue-next'
+// import SanpackPlugin from 'sandpack-vue3';
 import './css/index.css'
 import './css/custom.scss'
 
@@ -14,6 +15,7 @@ export default {
   ...DefaultTheme,
   Layout: NewLayout,
   enhanceApp({ app }) {
+    // app.use(SanpackPlugin())
     // register global compoment
     app.component('Tags', Tags)
     app.component('Category', Category)

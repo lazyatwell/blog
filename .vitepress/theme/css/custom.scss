@@ -236,3 +236,7 @@ a.VPNavBarMenuLink.active {
   border-radius: 2px;
   color: var(--vp-c-text-1);
 }
+
+button[title="Open in CodeSandbox"] {
+  display: none !important;
+}

@@ -5,6 +5,7 @@ import lightbox from 'vitepress-plugin-lightbox'
 import fs from 'node:fs'
 import path from 'node:path'
 import { handleHeadMeta } from './utils/handleHeadMeta'
+import vueJsx from '@vitejs/plugin-vue-jsx'
 // import { ab_mdit, jsdom_init } from "markdown-it-any-block"
 // jsdom_init()
 
@@ -55,7 +56,7 @@ export default defineConfig({
       },
     },
     server: { port: 5000 },
-    plugins: [Tailwind()],
+    plugins: [Tailwind(), vueJsx()],
     css: {
       preprocessorOptions: {
         scss: {
