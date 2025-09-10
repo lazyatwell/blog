@@ -25,7 +25,7 @@ tags:
     showTabs: true,
     closableTabs: false,
     editorHeight: 450, // default 300
-    editorWidthPercentage: 70, // default - 50
+    editorWidthPercentage: 75, // default 50
     autorun: true,
     wrapContent: true,
     showConsoleButton: true,
