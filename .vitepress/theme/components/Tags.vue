@@ -5,12 +5,8 @@
     </span>
   </div>
   <div class="tag-header">{{ selectTag }}</div>
-  <a
-    :href="withBase(article.regularPath)"
-    v-for="(article, index) in selectTag ? tags[selectTag] : []"
-    :key="index"
-    class="posts"
-  >
+  <a :href="withBase(article.regularPath)" v-for="(article, index) in selectTag ? tags[selectTag] : []" :key="index"
+    class="posts">
     <div class="post-container">
       <div class="post-dot"></div>
       {{ article.frontMatter.title }}
@@ -19,11 +15,12 @@
   </a>
 </template>
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useData, withBase, useRouter } from 'vitepress'
+import { computed, onMounted, ref, nextTick } from 'vue'
+import { useData, withBase, useRouter, useRoute } from 'vitepress'
 import { initTags } from '../functions'
 
 const router = useRouter()
+const route = useRoute()
 
 const { theme } = useData()
 const tags = computed(() => initTags(theme.value.posts))
@@ -31,16 +28,23 @@ const selectTag = ref(Object.keys(tags.value)[0] || '')
 
 const toggleTag = (tag) => {
   router.go(withBase(`/pages/tags?tag=${tag}`))
+  nextTick(() => {
+    getCurrTag()
+  })
 }
 
 onMounted(() => {
+  getCurrTag()
+})
+
+function getCurrTag() {
   const url = location.href
   const params = new URL(url).searchParams
   const currTag = params.get('tag') || ''
-  if (currTag) {
+  if (currTag && currTag !== selectTag.value) {
     selectTag.value = currTag
   }
-})
+}
 </script>
 
 <style lang="scss" scoped>
@@ -61,13 +65,16 @@ onMounted(() => {
   border-radius: 2px;
   color: var(--vp-c-text-1);
   cursor: pointer;
+
   sup {
     color: var(--vp-c-brand);
     font-weight: bold;
   }
+
   &.active {
     background-color: var(--vp-c-text-1);
     color: var(--vp-c-neutral-inverse);
+
     sup {
       color: var(--vp-c-neutral-inverse);
     }
