@@ -22,7 +22,7 @@ export default defineConfig({
   description: 'vitepress-blog',
   outDir: './dist',
   ignoreDeadLinks: true,
-  lastUpdated: true,
+  lastUpdated: false,
   cleanUrls: true,
   metaChunk: true,
   themeConfig: {
