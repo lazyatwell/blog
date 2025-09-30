@@ -61,8 +61,10 @@ description: 总有一些小公司喜欢使用 Windows 当服务器，图形界�
 ```sh
 #!/bin/bash
 
-# deploy-windows.sh
-# sh deploy-windows.sh
+# deploy/deploy.sh
+# usage
+# cd deploy
+# sh deploy.sh -e 10
 
 # exit when error
 set -e
@@ -71,13 +73,15 @@ set -e
 usage() {
     echo "用法: $0 [选项]"
     echo "选项:"
-    echo "  -e  <环境>    指定部署环境 (可选, 默认130)"
-    echo "                       130: 生产环境"
-    echo "  -f           全量部署 (可选，默认为增量部署)"
-    echo "  -b           跳过构建步骤 (可选)"
-    echo "  -t           跳过压缩步骤 (可选)"
-    echo "  -u           跳过上传步骤 (可选)"
-    echo "  -h           显示此帮助信息"
+    echo "  -e, --env <环境>    指定部署环境(必填)"
+    echo "                       10: xx测试环境"
+    echo "                       11: xx测试环境"
+    echo "                       12: xx生产环境"
+    echo "  -f, --full         全量部署 (可选，默认为增量部署)"
+    echo "  -b, --skip-build   跳过构建步骤 (可选)"
+    echo "  -t, --skip-tar     跳过压缩步骤 (可选)"
+    echo "  -u, --skip-upload  跳过上传步骤 (可选)"
+    echo "  -h, --help         显示此帮助信息"
     exit 1
 }
 
@@ -87,6 +91,7 @@ FULL=""
 SKIPBUILD=""
 SKIPTAR=""
 SKIPUPLOAD=""
+PUBLIC_DIR=()
 
 # 解析命名参数
 while getopts "e:fbtuh" opt; do
@@ -120,39 +125,58 @@ while getopts "e:fbtuh" opt; do
     esac
 done
 
+echo "ENV: $ENV"
+# 检查必需参数
+if [ -z "$ENV" ]; then
+    echo "错误: 必须指定环境参数 (-e)"
+    usage
+fi
 
 # 根据环境设置配置
 case $ENV in
-    "130")
-        host="Administrator@xx.xx.xxx.130"
+    "10")
+        host="admin@10.3.0.10"
+        port="22"
+        pathTo="/home/admin/server/nginx/html"
+        ;;
+    "11")
+        host="administrator@10.3.0.11"
         port="6022"
-        pathTo="E:\\path\\to\\nginx\\html"
+        pathTo="E:\\server\\nginx\\html"
+        ;;
+    "12")
+        host="administrator@10.3.0.12"
+        port="22"
+        pathTo="D:\\server\\nginx\\html"
         ;;
     *)
-        ENV="xx.xx.xxx.130"
-        host="Administrator@xx.xx.xxx.130"
-        port="6022"
-        pathTo="E:\\path\\to\\nginx\\html"
+        echo "错误: 不支持的环境参数 '$ENV'"
+        exit 1
         ;;
 esac
 
 echo "开始部署到 $ENV 环境，是否全量部署：${FULL:-NO}"
 
-# 根据是否全量部署设置目标文件
+shift $((OPTIND - 1))
+
+# 打包目录
+distDir="../dist"
+packName="dist.tar.gz"
+
 if [ -z "$FULL" ]; then
     echo "开始增量部署..."
+    # 需要打包的文件
     targetDistFp="index.* static"
 else
     echo "开始全量部署..."
     targetDistFp="."
 fi
 
-# variable
-distDir="../dist"
-packName="dist.tar.gz"
 
 # 根据是否跳过构建决定是否执行打包命令
-if [ -z "$SKIPBUILD" ]; then
+if [ ${#PUBLIC_DIR[@]} -gt 0 ]; then
+    echo "开始增量部署静态文件: ${targetDistFp}"
+elif [ -z "$SKIPBUILD" ]; then
     npm run build
 else
     echo "跳过构建步骤"
@@ -177,19 +201,26 @@ fi
 
 # 远程执行命令
 if [ -z "$FULL" ]; then
-    # 增量部署：只删除特定文件
+    # 增量部署：只更新特定文件
     remoteCmd="cd ${pathTo} && rm -rf ./${targetDistFp} && tar -xzf ${packName}"
 else
-    # 全量部署：删除除压缩包外的所有文件
-    remoteCmd="cd ${pathTo} && mv ${packName} ../ && rm -rf ./*  && tar -xzf ../${packName}"
+    # 全量部署：更新所有文件
+    remoteCmd="cd ${pathTo} && rm -rf ./*  && tar -xzf ../${packName}"
 fi
 
-# 提取盘符信息
-driveLetter=$(echo $pathTo | cut -c1)
+echo "remoteCmd: ${remoteCmd}"
 
-echo "开始执行远程命令: ${remoteCmd}"
-# 执行远程命令
-ssh -P${port} -t ${host} "cmd /c chcp 65001 && cd /d ${driveLetter}: && ${remoteCmd}"
+# 判断是否为Windows路径（包含冒号或反斜杠）
+if [[ $pathTo == *":"* ]] || [[ $pathTo == *"\\"* ]]; then
+    # Windows系统
+    # 提取盘符信息
+    driveLetter=$(echo $pathTo | cut -c1)
+    # 先切换盘符再执行远程命令
+    ssh -P${port} -t ${host} "cmd /c chcp 65001 && cd /d ${driveLetter}: && ${remoteCmd}"
+else
+    # 执行远程命令
+    ssh -P${port} -t ${host} "${remoteCmd}"
+fi
 
 echo "deploy done!"
 
