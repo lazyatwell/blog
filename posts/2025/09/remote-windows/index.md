@@ -205,7 +205,7 @@ if [ -z "$FULL" ]; then
     remoteCmd="cd ${pathTo} && rm -rf ./${targetDistFp} && tar -xzf ${packName}"
 else
     # 全量部署：更新所有文件
-    remoteCmd="cd ${pathTo} && rm -rf ./*  && tar -xzf ../${packName}"
+    remoteCmd="cd ${pathTo} && mv ${packName} ../ && rm -rf ./*  && tar -xzf ../${packName}"
 fi
 
 echo "remoteCmd: ${remoteCmd}"

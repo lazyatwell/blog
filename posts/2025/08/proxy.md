@@ -35,7 +35,8 @@ tags:
 2. 准备一个二级域名
    1. 配置A记录，指向服务器IP
 3. 服务器上安装科学上网服务
-   1. 使用 gost 转发服务
+   1. 使用的是 `gost` 转发服务, 协议为 HTTP/2 over TLS, 不使用额外的加密协议，足够绕过墙的检测
+   2. 也可以自行折腾 vmess、vless、trojan、hysteria等协议, 这里不作过多介绍
 4. 本机电脑，手机等终端上安装客户端软件，配置代理指向你的服务器
 5. 使用科学上网服务
 
@@ -55,9 +56,9 @@ sudo certbot certonly --standalone
 ```sh [启动gost转发服务]
 #!/bin/bash
 
-# 下面的s三个参数需要改成你的
+# 下面的三个参数需要改成你的
 # 域名
-DOMAIN="xx.xxx.com"
+DOMAIN="proxy.domain.com"
 # 用户名
 USER="xxx"
 # 密码
@@ -84,4 +85,84 @@ sudo docker run -d --name gost \
 5 0 1 * * /usr/bin/docker restart gost
 ```
 
+:::
+
+#### 443端口复用
+使用上述方式，服务器的443端口会被科学上网的gost转发代理服务占用，如果同时还有其他的https服务，则需要进行端口复用。
+
+原理如下：
+```
+客户端(curl -v -x https://proxy.domain.com https://www.google.com --proxy-user user:pass)
+   |
+   | HTTPS CONNECT proxy.domain.com:443
+   ↓
+[Nginx stream layer] --- SNI检测 ---
+   ├── domain.com → 127.0.0.1:1443 → Nginx http{} → 静态网页
+   └── proxy.domain.com → 127.0.0.1:8443 → gost代理
+```
+准备工作：
+- 需要配置两个域名A记录指向当前服务器IP
+  - eg: `proxy.domain.com` 和 `domain.com`
+- 需要配置两个证书
+  - eg: 一个用于 `domain.com`，一个用于 `proxy.domain.com`
+- 需要额外配置两个端口
+  - 一个用于 `domain.com`，eg: 端口为1443, 用于静态网页
+  - 一个用于 `proxy.domain.com`，eg: 端口为8443, 用于gost代理
+  - 443 端口仅用于分发
+
+::: code-group
+
+```nginx [nginx 配置]
+stream {
+    map $ssl_preread_server_name $backend {
+        proxy.domain.com 127.0.0.1:8443; # gost代理
+        domain.com  127.0.0.1:1443;  # domain.com 静态网站
+    }
+
+    server {
+        listen 443 reuseport;
+        ssl_preread on;
+
+        proxy_pass $backend;
+    }
+}
+
+http {
+    server {
+        listen 1443 ssl http2;
+        server_name domain.com;
+
+        ssl_certificate     /etc/ssl/domain.com/fullchain.pem;
+        ssl_certificate_key /etc/ssl/domain.com/privkey.pem;
+
+        root /var/www/html;
+        index index.html;
+    }
+}
+```
+
+```sh {12,15} [启动gost转发服务]
+#!/bin/bash
+
+# 下面的三个参数需要改成你的
+# 域名
+DOMAIN="proxy.domain.com"
+# 用户名
+USER="xxx"
+# 密码
+PASS="xxxxx"
+
+# 端口
+PORT=8443
+AUTH=$(echo -n ${USER}:${PASS} | base64)
+
+BIND_IP=127.0.0.1
+CERT_DIR=/etc/letsencrypt
+CERT=${CERT_DIR}/live/${DOMAIN}/fullchain.pem
+KEY=${CERT_DIR}/live/${DOMAIN}/privkey.pem
+sudo docker run -d --name gost \
+    -v ${CERT_DIR}:${CERT_DIR}:ro \
+    --net=host ginuerzh/gost \
+    -L "http2://${BIND_IP}:${PORT}?auth=${AUTH}&cert=${CERT}&key=${KEY}&probe_resist=code:404&knock=www.google.com"
+```
 :::
