@@ -50,11 +50,17 @@ description: 总有一些小公司喜欢使用 Windows 当服务器，图形界�
 - 默认步骤安装
 - 安装完成后，配置环境变量
   - 将 `Git` 的安装目录及`usr\bin`目录添加到环境变量 `PATH` 中
-  - 验证：打开命令行，能运行`tar`, `scp`, `grep` 等命令则说明安装成功
+  - 验证：打开命令行，能运行`scp`, `grep` 等命令则说明安装成功
 
 ## 使用
 - ssh 远程 windows机器，如同操作 linux机器一样操作 windows
 - 可以让 AI 编写一些通用的 shell 脚本，使用 tar, scp， ssh等命令完成自动化操作
+
+::: tip
+tar 命令需使用 windows system32 目录下的 tar.exe，而不是 git 下的`/usr/bin/tar.exe`  
+即环境变量的顺序，要求 `%SystemRoot%\System32` 在 `%ProgramFiles%\Git\usr\bin` 之前  
+因为前者功能更全，支持 `tar -czf dist.tar.gz -C dist index.* static` 里的星号通配符，后者仅把星号当成普通字符处理
+:::
 
 ::: details 前端部署脚本参考
 
@@ -210,19 +216,29 @@ fi
 
 echo "remoteCmd: ${remoteCmd}"
 
-# 判断是否为Windows路径（包含冒号或反斜杠）
 if [[ $pathTo == *":"* ]] || [[ $pathTo == *"\\"* ]]; then
     # Windows系统
+    echo "检测到Windows路径，执行Windows远程命令: ${remoteCmd}"
     # 提取盘符信息
     driveLetter=$(echo $pathTo | cut -c1)
-    # 先切换盘符再执行远程命令
-    ssh -P${port} -t ${host} "cmd /c chcp 65001 && cd /d ${driveLetter}: && ${remoteCmd}"
+    # 执行Windows远程命令
+    if ssh -P${port} -t ${host} "cmd /c chcp 65001 && cd /d ${driveLetter}: && ${remoteCmd}"; then
+        echo "部署成功!"
+    else
+        echo "部署失败! SSH远程命令执行出错，退出码: $?"
+        exit 1
+    fi
 else
-    # 执行远程命令
-    ssh -P${port} -t ${host} "${remoteCmd}"
+    # Linux系统
+    echo "检测到Linux路径，执行普通远程命令: ${remoteCmd}"
+    # 执行普通远程命令
+    if ssh -P${port} -t ${host} "${remoteCmd}"; then
+        echo "部署成功！"
+    else
+        echo "部署失败！SSH远程命令执行出错，退出码: $?"
+        exit 1
+    fi
 fi
-
-echo "deploy done!"
 
 ```
 
