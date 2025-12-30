@@ -2,7 +2,7 @@
   "name": "blog",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vitepress dev --host 0.0.0.0",
+    "dev": "vitepress dev",
     "build": "vitepress build",
     "preview": "vitepress preview",
     "format": "prettier --write posts/**/*.md pages/**/*.md .vitepress/**/*.ts .vitepress/**/*.vue customComponents/**/*.vue customComponents/**/*.tsx"
