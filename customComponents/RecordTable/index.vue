@@ -440,8 +440,10 @@ const monthLabels = computed(() => {
       }
     }
   })
-
-  labels[0].offset = 0
+  
+  if(labels.length > 0) {
+    labels[0].offset = 0
+  }
 
   return labels
 })
