@@ -39,7 +39,7 @@ const yearlyRecords = computed(() => {
 
 <div v-for="record in yearlyRecords" :key="record.year" class="yearly-record">
   <h2>{{ record.year }}</h2>
-  <RecordTable :data="record.data" locale="zh" />
+  <RecordTable :data="record.data" :year="Number(record.year)" locale="zh" />
 </div>
 
 <style>

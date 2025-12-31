@@ -157,6 +157,10 @@ const props = defineProps({
   locale: {
     type: String as PropType<Locale>,
     default: 'en'
+  },
+  year: {
+    type: Number,
+    default: () => new Date().getFullYear()
   }
 })
 
@@ -341,25 +345,26 @@ const getMondayBasedDay = (date: Date): number => {
   return day === 0 ? 6 : day - 1
 }
 
-// 计算最近一年的周数据（周一开始）
+// 计算指定年份的周数据（周一开始）
 const weeks = computed<WeekData[]>(() => {
   const result: WeekData[] = []
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const oneYearAgo = new Date(today)
-  oneYearAgo.setFullYear(today.getFullYear() - 1)
-  oneYearAgo.setDate(oneYearAgo.getDate() + 1)
+  
+  // 显示指定年份的 1月1日 到 12月31日
+  const rangeStart = new Date(props.year, 0, 1)
+  const rangeEnd = new Date(props.year, 11, 31)
+  
+  rangeStart.setHours(0, 0, 0, 0)
+  rangeEnd.setHours(0, 0, 0, 0)
 
   // 调整到该周的周一
-  const startDate = new Date(oneYearAgo)
+  const startDate = new Date(rangeStart)
   const dayOfWeekMondayBased = getMondayBasedDay(startDate)
   startDate.setDate(startDate.getDate() - dayOfWeekMondayBased)
 
   let currentDate = new Date(startDate)
   let weekIndex = 0
 
-  while (currentDate <= today) {
+  while (currentDate <= rangeEnd) {
     const week: WeekData = {
       weekIndex,
       days: []
@@ -368,11 +373,11 @@ const weeks = computed<WeekData[]>(() => {
     for (let d = 0; d < 7; d++) {
       const dateStr = formatDate(currentDate)
 
-      // 超过今天或早于一年范围的日期不渲染
-      if (currentDate > today || currentDate < oneYearAgo) {
+      // 超出年份范围的日期不渲染
+      if (currentDate > rangeEnd || currentDate < rangeStart) {
         week.days.push(null)
       }
-      // 一年范围内的日期正常显示
+      // 年份范围内正常显示
       else {
         const items = props.data[dateStr] || []
         week.days.push({
@@ -393,19 +398,12 @@ const weeks = computed<WeekData[]>(() => {
   return result
 })
 
-// 计算月份标签（从第一个月开始，跳过起始重复月份）
+// 计算月份标签
 const monthLabels = computed(() => {
   const labels: { name: string; offset: number }[] = []
   const monthNames = i18n.value.months
 
-  // 获取一年前的月份，用于判断是否跳过
-  const today = new Date()
-  const oneYearAgo = new Date(today)
-  oneYearAgo.setFullYear(today.getFullYear() - 1)
-  const startMonth = oneYearAgo.getMonth()
-
   let lastMonth = -1
-  let skippedFirstMonth = false
 
   weeks.value.forEach((week, weekIndex) => {
     // 找到该周的第一个有效日期
@@ -415,13 +413,6 @@ const monthLabels = computed(() => {
       const month = date.getMonth()
 
       if (month !== lastMonth) {
-        // 如果起始月份和当前月份（今天所在月份）相同，跳过起始月份
-        if (!skippedFirstMonth && month === startMonth && month === today.getMonth()) {
-          skippedFirstMonth = true
-          lastMonth = month
-          return
-        }
-
         // 月份标签位置 = 周索引 * 单元格总宽度
         labels.push({
           name: monthNames[month],
