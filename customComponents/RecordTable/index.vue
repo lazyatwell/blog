@@ -368,27 +368,18 @@ const weeks = computed<WeekData[]>(() => {
     for (let d = 0; d < 7; d++) {
       const dateStr = formatDate(currentDate)
 
-      // 超过今天的日期不渲染
-      if (currentDate > today) {
+      // 超过今天或早于一年范围的日期不渲染
+      if (currentDate > today || currentDate < oneYearAgo) {
         week.days.push(null)
       }
       // 一年范围内的日期正常显示
-      else if (currentDate >= oneYearAgo) {
+      else {
         const items = props.data[dateStr] || []
         week.days.push({
           date: dateStr,
           dayOfWeek: d,
           items,
           count: items.length
-        })
-      }
-      // 早于一年范围的日期显示为空占位（灰色格子）
-      else {
-        week.days.push({
-          date: dateStr,
-          dayOfWeek: d,
-          items: [],
-          count: 0
         })
       }
 
@@ -525,7 +516,7 @@ const handleTooltipLeave = () => {
 // 暗色模式适配
 :root.dark .record-table-container,
 .dark .record-table-container {
-  --color-level-0: #161b22;
+  --color-level-0: #2c2f34;
   --color-level-1: #0e4429;
   --color-level-2: #006d32;
   --color-level-3: #26a641;
