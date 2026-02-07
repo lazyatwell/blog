@@ -1,6 +1,12 @@
 <template>
   <!-- 词云组件 -->
-  <WordCloud :tags="tags" :active-tag="selectTag" @tag-click="toggleTag" />
+  <WordCloud 
+    :tags="tags" 
+    :active-tag="selectTag" 
+    @tag-click="toggleTag"
+    :minFontSize="1.2"
+    :maxFontSize="2.8"
+  />
 
   <!-- 标签头部和文章列表 -->
   <div class="tag-header">{{ selectTag }}</div>

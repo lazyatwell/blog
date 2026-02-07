@@ -78,11 +78,11 @@ const props = defineProps({
   // 最小和最大字体大小
   minFontSize: {
     type: Number,
-    default: 0.5
+    default: 1.0
   },
   maxFontSize: {
     type: Number,
-    default: 2.5
+    default: 2.8
   }
 })
 
@@ -147,6 +147,7 @@ const processedTags = computed(() => {
   }
   
   const maxCount = Math.max(...tagEntries.map(([_, posts]) => posts.length))
+  const totalTags = tagEntries.length
   
   const result = tagEntries.map(([name, posts], index) => ({
     name,
@@ -155,7 +156,7 @@ const processedTags = computed(() => {
     index,
     x: 0,
     y: 0,
-    fontSize: calculateFontSize(posts.length, maxCount),
+    fontSize: calculateFontSize(posts.length, maxCount, totalTags),
     placed: false
   }))
   
@@ -186,10 +187,25 @@ function getColorFromName(name) {
 }
 
 // 根据数量计算字体大小
-function calculateFontSize(count, maxCount) {
-  if (maxCount === 1) return props.minFontSize
+function calculateFontSize(count, maxCount, totalTags = 0) {
+  // 根据标签总数动态调整字体大小范围，确保即使标签少也能保持良好的可读性
+  let minFont = props.minFontSize
+  let maxFont = props.maxFontSize
+  
+  // 当标签总数较少时，增大最小字体大小
+  if (totalTags <= 3) {
+    minFont = Math.max(props.minFontSize, 1.35)
+    maxFont = Math.max(props.maxFontSize, 2.5)
+  } else if (totalTags <= 8) {
+    minFont = Math.max(props.minFontSize, 1.15)
+    maxFont = Math.max(props.maxFontSize, 2.6)
+  }
+  
+  if (maxCount === 1) return minFont
+  
   const ratio = count / maxCount
-  return props.minFontSize + (props.maxFontSize - props.minFontSize) * Math.pow(ratio, 0.7)
+  // 使用更温和的指数以确保低频标签仍有合理的大小
+  return minFont + (maxFont - minFont) * Math.pow(ratio, 0.65)
 }
 
 // 生成不同形状的点
@@ -778,6 +794,8 @@ function getTagStyle(tagData) {
     left: tagData.x + 'px',
     top: tagData.y + 'px',
     fontSize: tagData.fontSize + 'rem',
+    fontWeight: 500,
+    letterSpacing: '0.5px',
     color: getColorFromName(tagData.name),
     transform: 'translate(0, 0)',
     transition: 'all 0.3s ease',
@@ -946,14 +964,18 @@ onUnmounted(() => {
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 25px;
   cursor: pointer;
-  font-weight: 500;
-  line-height: 1.3;
+  font-weight: 600;
+  line-height: 1.4;
   white-space: nowrap;
   user-select: none;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.4);
   font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.3px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   
   // 悬停效果
   &:hover {
