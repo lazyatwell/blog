@@ -6,6 +6,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { handleHeadMeta } from './utils/handleHeadMeta'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import { withMermaid } from "vitepress-plugin-mermaid";
 // import { ab_mdit, jsdom_init } from "markdown-it-any-block"
 // jsdom_init()
 
@@ -14,7 +15,7 @@ const pageSize = 10
 
 const isProd = process.env.NODE_ENV === 'production'
 
-export default defineConfig({
+export default withMermaid({
   title: 'BluePen',
   lang: 'zh-CN',
   base: '/',
@@ -139,5 +140,7 @@ export default defineConfig({
   async buildEnd(siteConfig) {
     // 拷贝 CNAME 文件至 dist 目录
     fs.copyFileSync('CNAME', path.join(siteConfig.outDir, 'CNAME'))
+  },
+  mermaid: {
   }
 })

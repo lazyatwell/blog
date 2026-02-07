@@ -243,3 +243,40 @@ fi
 ```
 
 :::
+
+## 进阶用法
+以上操作是针对网络可以直连的机器，也有不少环境网络无法直连，**但双方都能上公网**  
+于是“向日葵”、“todesk”们粉墨登场了……又重新走上手动操作无限重复的老路上了    
+但办法总比问题多，也有“一次配置，后续省心”的自动化做法，即在之前的基础用法之上，使用`反向 SSH 隧道`  
+```mermaid
+graph LR
+    A[本地机器A] --->|ssh -p 10022| B[有公网IP的机器B]
+    C[目标机器C] <--->|ssh -R 10022:localhost:22| B
+
+    classDef pub fill:#e6f3ff,stroke:#0066cc;
+    class B pub;
+
+    linkStyle 0 stroke:#0066cc,stroke-width:2.5px;
+    linkStyle 1 stroke:#cc0000,stroke-width:2.5px;
+```
+即： A通过B的10022端口，访问C的22端口
+
+具体实现如下:  
+1. 需要有一台有公网IP的机器B, 开放一组端口，例如：`10022-10099`，用户名为 `userB`，IP为 `HOST_B_IP`
+2. 修改机器B的 sshd_config
+    ```ini
+    AllowTcpForwarding yes
+    GatewayPorts yes  # 允许非本机地址连接这个转发端口
+    ```
+3. 在机器B、C上安装ssh客户端、sshd服务端, 机器C的用户名为 `userC`, IP为 `HOST_C_IP`
+4. 在机器C上执行：`ssh -R 10022:localhost:22 userB@HOST_B_IP`, 在公网服务器B上创建反向隧道（10022端口→C的22端口）
+   ```ssh
+    # 由于 SSH 连接容易断开，你需要使用 autossh 或 systemd 来确保隧道在断开后能自动重连。
+    # 使用 autossh 方式如下：（如果依旧是windows，继续折腾如何安装 autossh 吧……本文不赘述）
+    # -M 0 表示不使用监听端口进行心跳检测，而是依赖 SSH 协议自身。
+    # -N 表示只转发，不执行远程命令。
+    # -f 表示后台运行。
+    autossh -M 0 -N -f -R 10022:localhost:22 userB@HOST_B_IP
+   ```
+5. 执行`ssh -p 10022 userC@HOST_C_IP`，验证连接是否成功
+6. 后续如再增加需要远程的机器，执行相同操作，使用额外端口（eg: 10023）转发即可
