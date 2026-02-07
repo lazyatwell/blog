@@ -127,7 +127,7 @@ type Locale = 'en' | 'zh'
 // 国际化配置
 const i18nConfig = {
   en: {
-    weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     records: 'records',
     dateLocale: 'en-US'
@@ -338,11 +338,15 @@ const formatDisplayDate = (dateStr: string): string => {
   return date.toLocaleDateString(i18n.value.dateLocale, options)
 }
 
-// 获取周一作为一周开始时的星期几（0=周一, 6=周日）
-const getMondayBasedDay = (date: Date): number => {
-  const day = date.getDay()
-  // 周日(0) -> 6, 周一(1) -> 0, 周二(2) -> 1, ...
-  return day === 0 ? 6 : day - 1
+// 获取一周中的第几天索引（根据 locale 决定起始日）
+const getWeekBasedDay = (date: Date): number => {
+  const day = date.getDay() // 0=周日, 1=周一, ...6=周六
+  if (props.locale === 'zh') {
+    // 周一为起点：周日(0)->6, 周一(1)->0, ...
+    return day === 0 ? 6 : day - 1
+  }
+  // 英文：周日为起点，直接使用原始值
+  return day
 }
 
 // 计算指定年份的周数据（周一开始）
@@ -356,10 +360,10 @@ const weeks = computed<WeekData[]>(() => {
   rangeStart.setHours(0, 0, 0, 0)
   rangeEnd.setHours(0, 0, 0, 0)
 
-  // 调整到该周的周一
+  // 调整到该周的起始日
   const startDate = new Date(rangeStart)
-  const dayOfWeekMondayBased = getMondayBasedDay(startDate)
-  startDate.setDate(startDate.getDate() - dayOfWeekMondayBased)
+  const dayOfWeekBased = getWeekBasedDay(startDate)
+  startDate.setDate(startDate.getDate() - dayOfWeekBased)
 
   let currentDate = new Date(startDate)
   let weekIndex = 0
