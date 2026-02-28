@@ -35,9 +35,9 @@ tags:
 2. 准备一个二级域名
    1. 配置A记录，指向服务器IP
 3. 服务器上安装科学上网服务
-   1. 使用的是 `gost` 转发服务, 协议为 HTTP/2 over TLS, 不使用额外的加密协议，足够绕过墙的检测
-   2. 也可以自行折腾 vmess、vless、trojan、hysteria等协议, 这里不作过多介绍
-4. 本机电脑，手机等终端上安装客户端软件，配置代理指向你的服务器
+   1. 使用的是 `gost` 转发服务, 协议为 HTTP/2 over TLS, 不使用额外的加密协议，但手动操作复杂，对新手不太友好
+   2. 也可以使用 vmess、vless、trojan、hysteria等协议，参考[一键安装xray](https://github.com/wulabing/xray_docker)等手段，对新手比较友好
+4. 本机电脑，手机等终端上安装客户端软件（桌面端推荐[clash verge](https://github.com/clash-verge-rev/clash-verge-rev/releases)），配置代理指向你的服务器
 5. 使用科学上网服务
 
 ::: code-group
@@ -51,6 +51,8 @@ sudo ln -s /opt/certbot/bin/certbot /usr/bin/certbot
 
 # 按照提示按照域名证书
 sudo certbot certonly --standalone
+
+# 也可以参考 https://github.com/acmesh-official/acme.sh 安装域名证书
 ```
 
 ```sh [启动gost转发服务]
