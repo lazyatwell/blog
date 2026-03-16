@@ -31,14 +31,20 @@ tags:
 
 ### 自建科学上网
 
-1. 购买海外服务器
-2. 准备一个二级域名
-   1. 配置A记录，指向服务器IP
-3. 服务器上安装科学上网服务
-   1. 使用的是 `gost` 转发服务, 协议为 HTTP/2 over TLS, 不使用额外的加密协议，但手动操作复杂，对新手不太友好
-   2. 也可以使用 vmess、vless、trojan、hysteria等协议，参考[一键安装xray](https://github.com/wulabing/xray_docker)等手段，对新手比较友好
-4. 本机电脑，手机等终端上安装客户端软件（桌面端推荐[clash verge](https://github.com/clash-verge-rev/clash-verge-rev/releases)），配置代理指向你的服务器
-5. 使用科学上网服务
+1. 购买海外服务器，推荐[搬瓦工](https://bandwagonhost.com/aff.php?aff=63939)或[DMIT](https://www.dmit.io/aff.php?aff=19154)，建议选美国节点。
+2. 服务器上安装科学上网服务
+   1. 参考[xray_docker](https://github.com/wulabing/xray_docker)或者其它各种一键安装脚本
+3. 在本机电脑，手机等终端上安装客户端软件（桌面端推荐[clash verge](https://github.com/clash-verge-rev/clash-verge-rev/releases)），配置代理指向你的服务器
+4. 使用科学上网服务
+   
+
+
+<details>
+<summary>http2 协议代理节点配置</summary>
+
+::: warning
+旧方案不推荐，建议使用 vless 协议
+:::
 
 ::: code-group
 
@@ -89,7 +95,7 @@ sudo docker run -d --name gost \
 
 :::
 
-#### 443端口复用
+##### 443端口复用
 使用上述方式，服务器的443端口会被科学上网的gost转发代理服务占用，如果同时还有其他的https服务，则需要进行端口复用。
 
 原理如下：
@@ -168,3 +174,5 @@ sudo docker run -d --name gost \
     -L "http2://${BIND_IP}:${PORT}?auth=${AUTH}&cert=${CERT}&key=${KEY}&probe_resist=code:404&knock=www.google.com"
 ```
 :::
+
+</details>

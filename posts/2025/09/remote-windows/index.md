@@ -270,7 +270,7 @@ graph LR
     ```
 3. 在机器B、C上安装ssh客户端、sshd服务端, 机器C的用户名为 `userC`, IP为 `HOST_C_IP`
 4. 在机器C上执行：`ssh -R 10022:localhost:22 userB@HOST_B_IP`, 在公网服务器B上创建反向隧道（10022端口→C的22端口）
-   ```ssh
+   ```sh
     # 由于 SSH 连接容易断开，你需要使用 autossh 或 systemd 来确保隧道在断开后能自动重连。
     # 使用 autossh 方式如下：（如果依旧是windows，继续折腾如何安装 autossh 吧……本文不赘述）
     # -M 0 表示不使用监听端口进行心跳检测，而是依赖 SSH 协议自身。
