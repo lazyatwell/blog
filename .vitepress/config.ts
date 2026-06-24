@@ -5,6 +5,11 @@ import lightbox from 'vitepress-plugin-lightbox'
 import fs from 'node:fs'
 import path from 'node:path'
 import { handleHeadMeta } from './utils/handleHeadMeta'
+import {
+  encryptProtectedPosts,
+  getProtectedRoutes,
+  removeProtectedFullChunks
+} from './utils/encryptProtectedPosts'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { withMermaid } from "vitepress-plugin-mermaid";
 // import { ab_mdit, jsdom_init } from "markdown-it-any-block"
@@ -29,6 +34,8 @@ export default withMermaid({
   themeConfig: {
     logo: { src: '/logo.png', width: 24, height: 24 },
     posts: await getPosts(pageSize),
+    // 受密码保护文章的归一化路由，客户端据此强制整页加载以显示加密页
+    protectedPaths: await getProtectedRoutes(),
     website: 'https://github.com/lazyatwell/blog',
     // 评论的仓库地址 https://giscus.app/ 请按照这个官方初始化后覆盖
     comment: {
@@ -38,7 +45,15 @@ export default withMermaid({
       categoryId: 'DIC_kwDOPm-Rmc4CuyUp'
     },
     search: {
-      provider: 'local'
+      provider: 'local',
+      options: {
+        // 受保护文章（含 passwd）不写入搜索索引，避免正文经搜索泄露
+        _render(src: string, env: any, md: any) {
+          const html = md.render(src, env)
+          if (env.frontmatter?.passwd != null) return ''
+          return env.frontmatter?.search === false ? '' : html
+        }
+      }
     }
   } as any,
   srcExclude: isProd
@@ -137,9 +152,19 @@ export default withMermaid({
   async transformHead(context) {
     return handleHeadMeta(context)
   },
+  // 从构建产物（lean/完整 chunk、html 内联 pageData）中删除 passwd，避免密码泄露
+  async transformPageData(pageData) {
+    if (pageData.frontmatter && pageData.frontmatter.passwd != null) {
+      delete pageData.frontmatter.passwd
+    }
+  },
   async buildEnd(siteConfig) {
     // 拷贝 CNAME 文件至 dist 目录
     fs.copyFileSync('CNAME', path.join(siteConfig.outDir, 'CNAME'))
+    // 对 frontmatter 含有非空 passwd 字段的文章进行 staticrypt 加密
+    await encryptProtectedPosts(siteConfig.outDir)
+    // 删除含正文的完整 js chunk（保留 .lean.js，保证 hydration 与交互正常）
+    await removeProtectedFullChunks(siteConfig.outDir)
   },
   mermaid: {
   }

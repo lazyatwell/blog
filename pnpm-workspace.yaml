@@ -1,0 +1,8 @@
+# pnpm 11 only reads auth/registry settings from .npmrc.
+# All other settings must live here with camelCase keys.
+shamefullyHoist: true
+strictPeerDependencies: false
+
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true

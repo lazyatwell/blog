@@ -19,9 +19,11 @@ async function getPosts(pageSize: number) {
     paths.map(async (item) => {
       const content = await fs.readFile(item, 'utf-8')
       const { data } = matter(content)
+      // 剔除 passwd，避免密码随 theme.posts 进入 metadata chunk 泄露
+      const { passwd: _passwd, ...rest } = data
       return {
         frontMatter: {
-          ...data,
+          ...rest,
           date: convertDateV2(data.date),
           // 处理 order：非数值时强制转换为 0
           order: _convertOrder(data.order)
